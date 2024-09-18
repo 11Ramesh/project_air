@@ -57,6 +57,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => BackendBloc(),
       child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Home(),
       ),
     );
