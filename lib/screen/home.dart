@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_air/const/localData.dart';
 import 'package:project_air/const/size.dart';
 import 'package:project_air/function/backend/backend_bloc.dart';
+import 'package:project_air/main.dart';
 import 'package:project_air/screen/bookingscreen.dart';
 
 import 'package:project_air/widgets/button.dart';
@@ -36,14 +38,6 @@ class _HomeState extends State<Home> {
   //api value
   bool isdirrectFlight = false;
 
-  Map<String, Map<String, String>> locationData = {
-    "DPS": {"city": "Dempasr Bali", "country": "Indonesia"},
-    "DMK": {"city": "Don Mang", "country": "Thailand"},
-    "XMN": {"city": "Xamen", "country": "China"},
-    "SYD": {"city": "Sydney", "country": "Australia"},
-    "BKK": {"city": "Bangkok", "country": "Thailand"},
-  };
-
   // Starting default values
   String fromCapitalName = "Dempasr Bali";
   String fromContryName = "Indonesia";
@@ -67,20 +61,20 @@ class _HomeState extends State<Home> {
   //api value
   int adult = 1;
   //api value
-  String classSeat = 'BUSINESS';
+  String classSeat = 'ECONOMY';
 
   late BackendBloc backendBloc;
-  
+
+  var locationData = LocationDataStore().locationData;
 
   @override
   void initState() {
     backendBloc = BlocProvider.of<BackendBloc>(context);
-   
+
     initializedDate();
     super.initState();
   }
 
- 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -103,6 +97,7 @@ class _HomeState extends State<Home> {
                   onSelectionChanged: (value) {
                     setState(() {
                       isRoundTrip = value;
+                      initializedDate();
                     });
                   },
                 ),
@@ -167,19 +162,21 @@ class _HomeState extends State<Home> {
         ),
         floatingActionButton: Floatingbuttons(onPressed: () {
           // boloc////////////////////////////////////////////////////////////////////////////
-          backendBloc.add(SearchFlightEvent(
-              isRoundTrip,
-              isbaggage,
-              isdirrectFlight,
-              fromItemCodeName,
-              toItemCodeName,
-              departureDate,
-              returnDate,
-              adult,
-              classSeat));
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Booking()));
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => X()));
+          // backendBloc.add(SearchFlightEvent(
+          //     isRoundTrip,
+          //     isbaggage,
+          //     isdirrectFlight,
+          //     fromItemCodeName,
+          //     toItemCodeName,
+          //     departureDate,
+          //     returnDate,
+          //     adult,
+          //     classSeat));
+          //Navigator.push(
+          // context, MaterialPageRoute(builder: (context) => Booking()));
+
+          print(departureDate);
+          print(returnDate);
         }),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
@@ -274,59 +271,112 @@ class _HomeState extends State<Home> {
       dateLimitEnd =
           '${DateTime.now().year}, ${DateTime.now().month}, ${DateTime.now().day}';
 
-      dateLimitStart = '${2040}, ${01}, ${01}';
+      dateLimitStart =
+          '${DateTime.now().year}, ${DateTime.now().month}, ${DateTime.now().day}';
     });
   }
 
   void getDate(String text) async {
-    List<String> splitDate = dateLimitEnd.split(', ');
-    List<String> splitDateStart = dateLimitStart.split(', ');
-    late DateTime? date;
-    if (text == 'start') {
+    if (isRoundTrip) {
+      //rounded trip
+      List<String> splitDateEnd = dateLimitEnd.split(', ');
+      List<String> splitDateStart = dateLimitStart.split(', ');
+      late DateTime? date;
+      if (text == 'start') {
+        date = await showDatePicker(
+          context: context,
+          initialDate: DateTime(
+            int.parse(splitDateStart[0]),
+            int.parse(splitDateStart[1]),
+            int.parse(splitDateStart[2]),
+          ),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2100),
+        );
+      } else {
+        List<String> selectDateForReturnSegmentOnly = returnDate.split('-');
+        date = await showDatePicker(
+          context: context,
+          initialDate: DateTime(
+            int.parse(selectDateForReturnSegmentOnly[0]),
+            int.parse(selectDateForReturnSegmentOnly[1]),
+            int.parse(selectDateForReturnSegmentOnly[2]),
+          ),
+          firstDate: DateTime(
+            int.parse(splitDateEnd[0]),
+            int.parse(splitDateEnd[1]),
+            int.parse(splitDateEnd[2]),
+          ),
+          lastDate: DateTime(2100),
+        );
+      }
+
+      if (date != null) {
+        setState(() {
+          _getMonth(date!.month);
+          if (text == 'start') {
+            departureDateviewOnly =
+                '${date.day} ${_getMonth(date.month)} ${date.year}';
+            departureDate =
+                '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
+            dateLimitEnd = '${date.year}, ${date.month}, ${date.day}';
+            dateLimitStart = '${date.year}, ${date.month}, ${date.day}';
+
+            ///
+            //////
+            ///
+            // Convert departureDate and returnDate strings back to DateTime objects
+            DateTime departure = DateTime.parse(departureDate);
+            DateTime returnD = DateTime.parse(returnDate);
+
+            if (returnD.isBefore(departure)) {
+              returnDateviewOnly =
+                  '${date.day} ${_getMonth(date.month)} ${date.year}';
+
+              returnDate =
+                  '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
+            }
+
+            ///
+            ///
+            /////
+            ///
+            ///
+          } else if (text == 'end') {
+            returnDateviewOnly =
+                '${date.day} ${_getMonth(date.month)} ${date.year}';
+
+            returnDate =
+                '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
+          }
+        });
+      }
+      //oneway trip
+    } else {
+      List<String> splitDateStart = dateLimitEnd.split(', ');
+
+      late DateTime? date;
       date = await showDatePicker(
         context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(
+        initialDate: DateTime(
           int.parse(splitDateStart[0]),
           int.parse(splitDateStart[1]),
           int.parse(splitDateStart[2]),
         ),
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2100),
       );
-    } else {
-      date = await showDatePicker(
-        context: context,
-        initialDate: DateTime(
-          int.parse(splitDate[0]),
-          int.parse(splitDate[1]),
-          int.parse(splitDate[2]),
-        ),
-        firstDate: DateTime(
-          int.parse(splitDate[0]),
-          int.parse(splitDate[1]),
-          int.parse(splitDate[2]),
-        ),
-        lastDate: DateTime(2040),
-      );
-    }
 
-    if (date != null) {
-      setState(() {
-        _getMonth(date!.month);
-        if (text == 'start') {
+      if (date != null) {
+        setState(() {
+          _getMonth(date!.month);
           departureDateviewOnly =
               '${date.day} ${_getMonth(date.month)} ${date.year}';
           departureDate =
               '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
           dateLimitEnd = '${date.year}, ${date.month}, ${date.day}';
-        } else if (text == 'end') {
-          returnDateviewOnly =
-              '${date.day} ${_getMonth(date.month)} ${date.year}';
-          returnDate =
-              '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
-          dateLimitStart = '${date.year}, ${date.month}, ${date.day}';
-        }
-      });
+        });
+      }
     }
   }
 
