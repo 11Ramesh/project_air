@@ -12,6 +12,8 @@ class SearchFlightEvent extends BackendEvent {
   String departureDate;
   String returnDate;
   int adult;
+  int children;
+  int infant;
   String classSeat;
 
   SearchFlightEvent(
@@ -23,10 +25,11 @@ class SearchFlightEvent extends BackendEvent {
       this.departureDate,
       this.returnDate,
       this.adult,
+      this.children,
+      this.infant,
       this.classSeat);
 }
 
 class emptyEvent extends BackendEvent {
-
   emptyEvent();
 }

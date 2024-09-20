@@ -12,6 +12,8 @@ class FlightCardRound extends StatelessWidget {
   List<String?>? spentTimes;
   List<String?>? endTimes;
   List<String?>? endlocations;
+  List<String?>? endDate;
+  List<String?>? startDate;
   String? nonStop;
   String? adult;
   String? weight;
@@ -33,6 +35,8 @@ class FlightCardRound extends StatelessWidget {
     this.j,
     this.isdirectFlight,
     required this.isbaggage,
+    this.endDate,
+    this.startDate,
     super.key,
   });
 
@@ -60,7 +64,7 @@ class FlightCardRound extends StatelessWidget {
           children: [
             Textshow(
               text: "Emirates",
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
             Height(height: 10),
@@ -69,7 +73,7 @@ class FlightCardRound extends StatelessWidget {
               children: [
                 Image.asset(
                   'assets/logo.png',
-                  width: ScreenUtil.screenWidth * 0.2,
+                  width: ScreenUtil.screenWidth * 0.15,
                 ),
                 Row(
                   children: [
@@ -83,6 +87,11 @@ class FlightCardRound extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  Textshow(
+                                    text: startDate?[i] ?? "2024",
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                   Textshow(
                                     text: startTimes?[i] ?? "10:00",
                                     fontSize: 16,
@@ -121,6 +130,11 @@ class FlightCardRound extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Textshow(
+                                    text: endDate?[i] ?? "2024",
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  Textshow(
                                     text: endTimes?[i] ?? "1:00",
                                     fontSize: 16,
                                   ),
@@ -130,7 +144,7 @@ class FlightCardRound extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Height(height: 60)
+                              Height(height: 80)
                             ],
                           ),
                       ],

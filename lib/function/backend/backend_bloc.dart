@@ -28,6 +28,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         String departureDate = event.departureDate;
         String returnDate = event.returnDate;
         int adult = event.adult;
+        int children = event.children;
+        int infant = event.infant;
         String classSeat = event.classSeat;
 
         String? spentTime;
@@ -37,6 +39,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         String? endlocation;
         String? weight;
         String? price;
+        String? startDate;
+        String? endDate;
 
         List<Map<String, String>> sentData = [];
         List<Map<String, dynamic>> sentDataRound = [];
@@ -50,6 +54,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
             'destinationLocationCode': toItemCodeName,
             'departureDate': departureDate,
             'adults': adult.toString(),
+            'children': children.toString(),
+            'infants': infant.toString(),
             'nonStop': isdirrectFlight.toString(),
             'max': '250',
             'travelClass': classSeat,
@@ -92,18 +98,24 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     startTime = Element['departure']['at'];
                     DateTime dateTime = DateTime.parse(startTime!);
                     startTime = DateFormat('HH:mm').format(dateTime);
+                    startDate = Element['departure']['at'];
+                    startDate = startDate!.substring(0, 10);
                     startlocation = Element['departure']['iataCode'];
                     //
                     endTime = Element['arrival']['at'];
                     DateTime dateTime1 = DateTime.parse(endTime!);
                     endTime = DateFormat('HH:mm').format(dateTime1);
+                    endDate = Element['arrival']['at'];
+                    endDate = endDate!.substring(0, 10);
                     endlocation = Element['arrival']['iataCode'];
                     //
                     Map<String, String> segmentDataMap = {
                       'spentTime': spentTime ?? '',
                       'startTime': startTime ?? '',
+                      'startDate': startDate ?? '',
                       'startLocation': startlocation ?? '',
                       'endTime': endTime ?? '',
+                      'endDate': endDate ?? '',
                       'endLocation': endlocation ?? '',
                     };
                     print(segmentDataMap);

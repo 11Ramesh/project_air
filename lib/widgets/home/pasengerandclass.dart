@@ -9,12 +9,12 @@ import 'package:project_air/widgets/width.dart';
 class PassengerAndClass extends StatelessWidget {
   VoidCallback onTapPassenger;
   VoidCallback onTapClass;
-  final int adult;
+  final int person;
   String classSeat;
   PassengerAndClass(
       {required this.onTapPassenger,
       required this.onTapClass,
-      required this.adult,
+      required this.person,
       required this.classSeat,
       super.key});
 
@@ -50,7 +50,7 @@ class PassengerAndClass extends StatelessWidget {
                     Icon(Icons.person, size: 40.0),
                     Width(width: 20),
                     Textshow(
-                      text: '$adult Adult',
+                      text: '$person Persons',
                       fontWeight: FontWeight.bold,
                     ),
                   ],

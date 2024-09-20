@@ -22,6 +22,10 @@ import 'package:http/http.dart' as http;
 import 'package:project_air/widgets/tokenexpired.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final List<int> passengerOptions = [1, 2, 3, 4];
+final List<int> childrenOptions = [0, 1, 2, 3];
+final List<int> infantsOptions = [0, 1, 2];
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -60,6 +64,9 @@ class _HomeState extends State<Home> {
   String dateLimitStart = '';
   //api value
   int adult = 1;
+  int children = 0;
+  int infant = 0;
+  int person = 1;
   //api value
   String classSeat = 'ECONOMY';
 
@@ -67,12 +74,22 @@ class _HomeState extends State<Home> {
 
   var locationData = LocationDataStore().locationData;
 
+  late int tokenExpiry;
+  String? token = '';
+
   @override
   void initState() {
     backendBloc = BlocProvider.of<BackendBloc>(context);
 
     initializedDate();
+    initializedsharedPreference();
     super.initState();
+  }
+
+  initializedsharedPreference() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    tokenExpiry = sharedPreferences.getInt('token_expiry') ?? 0;
+    token = sharedPreferences.getString('token');
   }
 
   @override
@@ -132,7 +149,7 @@ class _HomeState extends State<Home> {
                     }),
                 Height(height: 20),
                 PassengerAndClass(
-                  adult: adult,
+                  person: person,
                   classSeat: classSeat,
                   onTapPassenger: () {
                     showBoxPassenger(context);
@@ -161,22 +178,28 @@ class _HomeState extends State<Home> {
           ),
         ),
         floatingActionButton: Floatingbuttons(onPressed: () {
-          // boloc////////////////////////////////////////////////////////////////////////////
-          // backendBloc.add(SearchFlightEvent(
-          //     isRoundTrip,
-          //     isbaggage,
-          //     isdirrectFlight,
-          //     fromItemCodeName,
-          //     toItemCodeName,
-          //     departureDate,
-          //     returnDate,
-          //     adult,
-          //     classSeat));
-          //Navigator.push(
-          // context, MaterialPageRoute(builder: (context) => Booking()));
-
-          print(departureDate);
-          print(returnDate);
+          if (token != null &&
+              DateTime.now().millisecondsSinceEpoch < tokenExpiry) {
+            // boloc////////////////////////////////////////////////////////////////////////////
+            backendBloc.add(SearchFlightEvent(
+              isRoundTrip,
+              isbaggage,
+              isdirrectFlight,
+              fromItemCodeName,
+              toItemCodeName,
+              departureDate,
+              returnDate,
+              adult,
+              children,
+              infant,
+              classSeat,
+            ));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Booking()));
+          } else {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => Tokenexpired()));
+          }
         }),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
@@ -426,6 +449,10 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> showBoxPassenger(BuildContext context) async {
+    int selectedAdults = adult;
+    int selectedChildren = children;
+    int selectedInfants = infant;
+
     final selectedPassenger = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -434,19 +461,84 @@ class _HomeState extends State<Home> {
             'Passenger',
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
           ),
-          content: SizedBox(
-            width: double.maxFinite, // Adjust width to fit the content
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: 12,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text('${index + 1} Adult'),
-                  onTap: () {
-                    Navigator.pop(context, '${index + 1}');
-                  },
-                );
-              },
+          contentPadding: EdgeInsets.zero, // Removes the default padding
+          content: Padding(
+            padding:
+                const EdgeInsets.all(16.0), // Adds padding around the content
+            child: SingleChildScrollView(
+              // Ensures dialog content is scrollable
+              child: Column(
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the dialog takes only needed space
+                children: [
+                  // Dropdown for Adults
+                  DropdownButtonFormField<int>(
+                    value: selectedAdults,
+                    decoration: InputDecoration(labelText: 'Number of Adults'),
+                    items: passengerOptions.map((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text('$value Adults'),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      selectedAdults = newValue!;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  // Dropdown for Children
+                  DropdownButtonFormField<int>(
+                    value: selectedChildren,
+                    decoration:
+                        InputDecoration(labelText: 'Number of Children'),
+                    items: childrenOptions.map((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text('$value Children'),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      selectedChildren = newValue!;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  // Dropdown for Infants
+                  DropdownButtonFormField<int>(
+                    value: selectedInfants,
+                    decoration: InputDecoration(labelText: 'Number of Infants'),
+                    items: infantsOptions.map((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text('$value Infants'),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      selectedInfants = newValue!;
+                    },
+                  ),
+                  SizedBox(height: 32),
+                  // Save Button
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        adult = selectedAdults;
+                        children = selectedChildren;
+                        infant = selectedInfants;
+
+                        person = adult + children + infant;
+                      });
+
+                      Navigator.pop(context);
+                    },
+                    child: Text('Save'),
+                    style: ElevatedButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      textStyle: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -4,12 +4,13 @@ import 'package:project_air/const/size.dart';
 import 'package:project_air/function/backend/backend_bloc.dart';
 import 'package:project_air/screen/home.dart';
 import 'package:project_air/widgets/appbar.dart';
-import 'package:project_air/widgets/booking/card.dart';
+
 import 'package:project_air/widgets/booking/cardroudtrip.dart';
 import 'package:project_air/widgets/height.dart';
 import 'package:project_air/widgets/nodata.dart';
 import 'package:project_air/widgets/textShow.dart';
 import 'package:project_air/widgets/tokenexpired.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Booking extends StatefulWidget {
   const Booking({super.key});
@@ -108,6 +109,9 @@ class _BookingState extends State<Booking> {
                             startTimes: List<String?>.from(sentDataRound[index]
                                     ['segmentData']
                                 .map((segment) => segment['startTime'])),
+                            startDate: List<String?>.from(sentDataRound[index]
+                                    ['segmentData']
+                                .map((segment) => segment['startDate'])),
                             startlocations: List<String?>.from(
                                 sentDataRound[index]['segmentData'].map(
                                     (segment) => segment['startLocation'])),
@@ -118,6 +122,9 @@ class _BookingState extends State<Booking> {
                             endTimes: List<String?>.from(sentDataRound[index]
                                     ['segmentData']
                                 .map((segment) => segment['endTime'])),
+                            endDate: List<String?>.from(sentDataRound[index]
+                                    ['segmentData']
+                                .map((segment) => segment['endDate'])),
                             endlocations: List<String?>.from(
                                 sentDataRound[index]['segmentData']
                                     .map((segment) => segment['endLocation'])),
@@ -138,7 +145,7 @@ class _BookingState extends State<Booking> {
         } else if (state is NoDataState) {
           return Scaffold(body: NoData());
         } else if (state is ErorrState) {
-          return Scaffold(body: Tokenexpired());
+          return Tokenexpired();
         } else if (state is LoadingState) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         } else {
