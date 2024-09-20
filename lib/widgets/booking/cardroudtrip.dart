@@ -187,11 +187,13 @@ class FlightCardRound extends StatelessWidget {
               children: [
                 Textshow(
                   text: price ?? "EUR 236.07",
-                  fontSize: ScreenUtil.screenWidth < 400 ? 17 : 18,
+                  fontSize: ScreenUtil.screenWidth < 400 ? 16 : 18,
                   fontWeight: FontWeight.bold,
                 ),
                 Container(
-                  width: ScreenUtil.screenWidth * 0.35,
+                  width: ScreenUtil.screenWidth < 400
+                      ? ScreenUtil.screenWidth * 0.35
+                      : ScreenUtil.screenWidth * 0.35,
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
@@ -203,12 +205,14 @@ class FlightCardRound extends StatelessWidget {
                     ),
                     child: Textshow(
                       text: "View flight Details",
-                      fontSize: ScreenUtil.screenWidth < 400 ? 10 : 11,
+                      fontSize: ScreenUtil.screenWidth < 400 ? 9 : 11,
                     ),
                   ),
                 ),
                 Container(
-                  width: ScreenUtil.screenWidth * 0.25,
+                  width: ScreenUtil.screenWidth < 400
+                      ? ScreenUtil.screenWidth * 0.25
+                      : ScreenUtil.screenWidth * 0.25,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -220,7 +224,7 @@ class FlightCardRound extends StatelessWidget {
                     onPressed: () {},
                     child: Textshow(
                       text: "Book Now",
-                      fontSize: ScreenUtil.screenWidth < 400 ? 10 : 11,
+                      fontSize: ScreenUtil.screenWidth < 400 ? 9 : 11,
                     ),
                   ),
                 ),
