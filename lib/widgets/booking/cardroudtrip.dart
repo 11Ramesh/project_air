@@ -102,7 +102,10 @@ class FlightCardRound extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Arrow(Width: ScreenUtil.screenWidth * 0.1),
+                              Arrow(
+                                  Width: ScreenUtil.screenWidth < 400
+                                      ? ScreenUtil.screenWidth * 0.08
+                                      : ScreenUtil.screenWidth * 0.1),
                               isdirectFlight == true
                                   ? Column(
                                       crossAxisAlignment:
@@ -124,7 +127,10 @@ class FlightCardRound extends StatelessWidget {
                                       text: spentTimes?[i] ?? "3H 30m",
                                       fontSize: 15,
                                     ),
-                              Arrow(Width: ScreenUtil.screenWidth * 0.1),
+                              Arrow(
+                                  Width: ScreenUtil.screenWidth < 400
+                                      ? ScreenUtil.screenWidth * 0.08
+                                      : ScreenUtil.screenWidth * 0.1),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -181,35 +187,41 @@ class FlightCardRound extends StatelessWidget {
               children: [
                 Textshow(
                   text: price ?? "EUR 236.07",
-                  fontSize: 18,
+                  fontSize: ScreenUtil.screenWidth < 400 ? 17 : 18,
                   fontWeight: FontWeight.bold,
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Container(
+                  width: ScreenUtil.screenWidth * 0.35,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                  child: Textshow(
-                    text: "View flight Details",
-                    fontSize: 12,
+                    child: Textshow(
+                      text: "View flight Details",
+                      fontSize: ScreenUtil.screenWidth < 400 ? 10 : 11,
+                    ),
                   ),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Container(
+                  width: ScreenUtil.screenWidth * 0.25,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                  onPressed: () {},
-                  child: Textshow(
-                    text: "Book Now",
-                    fontSize: 12,
+                    onPressed: () {},
+                    child: Textshow(
+                      text: "Book Now",
+                      fontSize: ScreenUtil.screenWidth < 400 ? 10 : 11,
+                    ),
                   ),
                 ),
               ],
