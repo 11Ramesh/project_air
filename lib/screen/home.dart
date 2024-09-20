@@ -16,6 +16,7 @@ import 'package:project_air/widgets/home/departureList.dart';
 import 'package:project_air/widgets/home/destinationList.dart';
 import 'package:project_air/widgets/home/pasengerandclass.dart';
 import 'package:project_air/widgets/home/tougle.dart';
+import 'package:project_air/widgets/textShow.dart';
 import 'package:project_air/widgets/textfield.dart';
 import 'package:flutter/src/rendering/shifted_box.dart';
 import 'package:http/http.dart' as http;
@@ -34,7 +35,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController controller = TextEditingController();
   //api value
   bool isRoundTrip = true;
   //api value
@@ -43,15 +43,15 @@ class _HomeState extends State<Home> {
   bool isdirrectFlight = false;
 
   // Starting default values
-  String fromCapitalName = "Dempasr Bali";
-  String fromContryName = "Indonesia";
+  String fromCapitalName = "Milan-Malpensa";
+  String fromContryName = "Italy";
   //api value
-  String fromItemCodeName = 'DPS';
+  String fromItemCodeName = 'MXP';
 
-  String toCapitalName = "Don Mang";
-  String toContryName = "Thailand";
+  String toCapitalName = "Colombo";
+  String toContryName = "Sri Lanka";
   //api value
-  String toItemCodeName = 'DMK';
+  String toItemCodeName = 'CMB';
 
   String monthName = '';
   //api value
@@ -73,6 +73,7 @@ class _HomeState extends State<Home> {
   late BackendBloc backendBloc;
 
   var locationData = LocationDataStore().locationData;
+  var locationDataUsingName = LocationDataStore().locationDataUsingName;
 
   late int tokenExpiry;
   String? token = '';
@@ -207,9 +208,11 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> showBoxDestination(BuildContext context, String text) async {
+    TextEditingController controller = TextEditingController();
     String selectedCapital = '';
     String selectedCountry = '';
     String selectedCode = '';
+    List resultList = [];
 
     final result = await showDialog<Map<String, String>>(
       context: context,
@@ -221,42 +224,108 @@ class _HomeState extends State<Home> {
           ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Textfields(
-                    prefixIcon: Icons.location_on,
-                    controller: controller,
-                    text: text,
-                    onChanged: (value) {
-                      setState(() {
-                        final upperCode = value.toUpperCase();
-                        if (locationData.containsKey(upperCode)) {
-                          selectedCapital =
-                              locationData[upperCode]?['city'] ?? '';
-                          selectedCountry =
-                              locationData[upperCode]?['country'] ?? '';
-                          selectedCode = upperCode;
-                        } else {
+              List<MapEntry<String, Map<String, String>>> filteredEntries = [];
+
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Textfields(
+                      prefixIcon: Icons.location_on,
+                      controller: controller,
+                      text: text,
+                      onChanged: (value) {
+                        setState(() {
+                          final input = value.toUpperCase();
+
+                          // Clear the previously selected values
                           selectedCapital = '';
-                        }
-                      });
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  selectedCapital == ""
-                      ? Center(child: Text("No Data Found"))
-                      : ListTile(
-                          onTap: () {
-                            Navigator.pop(context, {
-                              "capital": selectedCapital,
-                              "country": selectedCountry,
-                              "code": selectedCode,
-                            });
-                          },
-                          title: Text("${selectedCapital} (${selectedCode})"),
-                        ),
-                ],
+                          selectedCountry = '';
+                          selectedCode = '';
+
+                          if (input.isNotEmpty && input.length <= 3) {
+                            // Filter locationData based on input
+                            filteredEntries =
+                                locationData.entries.where((entry) {
+                              return entry.key.startsWith(input);
+                            }).toList();
+
+                            if (filteredEntries.isNotEmpty) {
+                              resultList = [];
+                              for (final firstResult in filteredEntries) {
+                                selectedCode = firstResult.key;
+                                selectedCapital =
+                                    firstResult.value['city'] ?? '';
+                                selectedCountry =
+                                    firstResult.value['country'] ?? '';
+                                Map<String, String> result = {
+                                  "capital": selectedCapital,
+                                  "country": selectedCountry,
+                                  "code": selectedCode,
+                                };
+                                resultList.add(result);
+                              }
+                            }
+                          }
+
+                          if (input.isNotEmpty && input.length > 3) {
+                            filteredEntries =
+                                locationDataUsingName.entries.where((entry) {
+                              return entry.key
+                                  .trim()
+                                  .toLowerCase()
+                                  .startsWith(input.trim().toLowerCase());
+                            }).toList();
+
+                            resultList = [];
+                            for (final firstResult in filteredEntries) {
+                              selectedCapital = firstResult.key;
+                              selectedCode = firstResult.value['code'] ?? '';
+                              selectedCountry =
+                                  firstResult.value['country'] ?? '';
+                              Map<String, String> result = {
+                                "capital": selectedCapital,
+                                "country": selectedCountry,
+                                "code": selectedCode,
+                              };
+                              resultList.add(result);
+                            }
+                          }
+                        });
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    resultList.isEmpty
+                        ? const Center(child: Text("Progressive Search"))
+                        : SizedBox(
+                            width: double.maxFinite,
+                            height: ScreenUtil.screenHeight *
+                                0.3, // Set a fixed height to avoid layout issues
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: resultList.length,
+                              itemBuilder: (context1, index1) {
+                                return ListTile(
+                                  onTap: () {
+                                    Navigator.pop(context, <String, String>{
+                                      "capital": resultList[index1]['capital'],
+                                      "country": resultList[index1]['country'],
+                                      "code": resultList[index1]['code'],
+                                    });
+                                    controller.clear();
+                                  },
+                                  title: Textshow(
+                                    text:
+                                        "${resultList[index1]['capital']} (${resultList[index1]['code']})",
+                                    fontSize: 15,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                  ],
+                ),
               );
             },
           ),
@@ -353,11 +422,13 @@ class _HomeState extends State<Home> {
             DateTime returnD = DateTime.parse(returnDate);
 
             if (returnD.isBefore(departure)) {
+              final newReturnDate = date.add(Duration(days: 7));
+
               returnDateviewOnly =
-                  '${date.day} ${_getMonth(date.month)} ${date.year}';
+                  '${newReturnDate.day} ${_getMonth(newReturnDate.month)} ${newReturnDate.year}';
 
               returnDate =
-                  '${date.year}-${date.month < 10 ? '0${date.month}' : date.month}-${date.day < 10 ? '0${date.day}' : date.day}';
+                  '${newReturnDate.year}-${newReturnDate.month < 10 ? '0${newReturnDate.month}' : newReturnDate.month}-${newReturnDate.day < 10 ? '0${newReturnDate.day}' : newReturnDate.day}';
             }
 
             ///

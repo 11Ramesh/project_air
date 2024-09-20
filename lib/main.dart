@@ -21,6 +21,7 @@ class LocationDataStore {
   static final LocationDataStore _instance = LocationDataStore._internal();
 
   Map<String, Map<String, String>> locationData = {};
+  Map<String, Map<String, String>> locationDataUsingName = {};
 
   LocationDataStore._internal();
 
@@ -47,6 +48,7 @@ class LocationDataStore {
 
           if (code.isNotEmpty) {
             locationData[code] = {"city": city, "country": country};
+            locationDataUsingName[city] = {"code": code, "country": country};
           }
         }
       }
