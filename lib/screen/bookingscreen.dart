@@ -132,6 +132,10 @@ class _BookingState extends State<Booking> {
                             weight: sentDataRound[index]['weight'],
                             price: sentDataRound[index]['price'],
                             isdirectFlight: isdirrectFlight,
+                            airLineName: sentDataRound[index]['airlineName'],
+                            image: sentDataRound[index]['airlinecode']
+                                .toLowerCase(),
+                            //image: 'tk'
                           ),
                           Height(height: 10)
                         ],

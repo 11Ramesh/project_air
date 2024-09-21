@@ -56,6 +56,41 @@ class LocationDataStore {
   }
 }
 
+class AirPortNameDataStore {
+  static final AirPortNameDataStore _instance =
+      AirPortNameDataStore._internal();
+
+  AirPortNameDataStore._internal();
+
+  factory AirPortNameDataStore() {
+    return _instance;
+  }
+
+  Map<String, Map<String, String>> airlineNameData = {};
+  Future<void> airlinesNameData() async {
+    var bytes = await rootBundle.load('assets/airlinesname.xlsx');
+    var excel = Excel.decodeBytes(bytes.buffer.asUint8List());
+
+    for (var sheetName in excel.tables.keys) {
+      var sheet = excel.tables[sheetName];
+      if (sheet == null) continue;
+
+      for (int rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
+        List<Data?> row = sheet.row(rowIndex);
+
+        if (row.length >= 2) {
+          var airlineName = row[0]?.value?.toString() ?? '';
+          var airlineCode = row[1]?.value?.toString() ?? '';
+
+          if (airlineCode.isNotEmpty) {
+            airlineNameData[airlineCode] = {"airlineName": airlineName};
+          }
+        }
+      }
+    }
+  }
+}
+
 Future<void> fetchAmadeusToken(BuildContext context) async {
   try {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -131,6 +166,8 @@ void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await LocationDataStore().loadLocationData();
+  await AirPortNameDataStore().airlinesNameData();
+
   //runApp(const MyApp());
   runApp(DevicePreview(
     enabled: !kReleaseMode,

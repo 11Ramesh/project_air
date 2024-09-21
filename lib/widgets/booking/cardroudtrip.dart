@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:project_air/const/size.dart';
 import 'package:project_air/widgets/button.dart';
 import 'package:project_air/widgets/containerarrow.dart';
@@ -21,6 +22,8 @@ class FlightCardRound extends StatelessWidget {
   int? j;
   bool? isdirectFlight;
   bool isbaggage;
+  String? airLineName;
+  String? image;
 
   FlightCardRound({
     this.startTimes,
@@ -37,11 +40,23 @@ class FlightCardRound extends StatelessWidget {
     required this.isbaggage,
     this.endDate,
     this.startDate,
+    this.airLineName,
+    this.image,
     super.key,
   });
 
+  Future<bool> _assetExists(String path) async {
+    try {
+      await rootBundle.load(path);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final imagePath = 'assets/airlinelogo/$image.png';
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 4,
@@ -63,7 +78,7 @@ class FlightCardRound extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Textshow(
-              text: "Emirates",
+              text: airLineName ?? "No Data Present",
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -71,10 +86,29 @@ class FlightCardRound extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Image.asset(
-                  'assets/logo.png',
-                  width: ScreenUtil.screenWidth * 0.15,
+                //
+                FutureBuilder<bool>(
+                  future: _assetExists(imagePath),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(); // Or a loading indicator
+                    } else if (snapshot.hasError || !snapshot.data!) {
+                      return Image.asset(
+                        'assets/airlinelogo/noimage.png',
+                        width: ScreenUtil.screenWidth * 0.15,
+                      );
+                    } else {
+                      return Image.asset(
+                        imagePath,
+                        width: ScreenUtil.screenWidth * 0.15,
+                      );
+                    }
+                  },
                 ),
+                // Image.asset(
+                //   'assets/logo.png',
+                //   width: ScreenUtil.screenWidth * 0.15,
+                // ),
                 Row(
                   children: [
                     Column(

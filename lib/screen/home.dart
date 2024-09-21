@@ -74,6 +74,7 @@ class _HomeState extends State<Home> {
 
   var locationData = LocationDataStore().locationData;
   var locationDataUsingName = LocationDataStore().locationDataUsingName;
+  
 
   late int tokenExpiry;
   String? token = '';
@@ -195,6 +196,8 @@ class _HomeState extends State<Home> {
               infant,
               classSeat,
             ));
+           
+
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => Booking()));
           } else {

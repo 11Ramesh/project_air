@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_air/const/const.dart';
+import 'package:project_air/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'backend_event.dart';
@@ -19,6 +20,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();
         String token = sharedPreferences.getString('token').toString();
+
+        var airlinesNameData = AirPortNameDataStore().airlinesNameData;
 
         bool isRoundTrip = event.isRoundTrip;
         bool isbaggage = event.isbaggage;
@@ -41,6 +44,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         String? price;
         String? startDate;
         String? endDate;
+        String? airlinecode;
 
         List<Map<String, String>> sentData = [];
         List<Map<String, dynamic>> sentDataRound = [];
@@ -125,6 +129,14 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                 }
 
                 //
+
+                airlinecode = Element['validatingAirlineCodes']?[0];
+                String? airlineName = AirPortNameDataStore()
+                        .airlineNameData[airlinecode]?['airlineName'] ??
+                    'No Airline Name';
+
+                //
+
                 price = Element['price']['total'] +
                     " " +
                     Element['price']['currency'];
@@ -134,7 +146,6 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                             ['includedCheckedBags']?['weight']
                         ?.toString()) ??
                     '0';
-
                 // Map<String, dynamic> dataMap = {
                 //   'segmentData': segmentData,
                 //   'price': price ?? '',
@@ -148,7 +159,9 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     'segmentData': segmentData,
                     'price': price ?? '',
                     'adult': adult.toString(),
-                    'weight': weight
+                    'weight': weight,
+                    'airlinecode': airlinecode,
+                    'airlineName': airlineName
                   };
 
                   sentDataRoundFalseBaggage.add(dataMap);
@@ -157,7 +170,9 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     'segmentData': segmentData,
                     'price': price ?? '',
                     'adult': adult.toString(),
-                    'weight': weight
+                    'weight': weight,
+                    'airlinecode': airlinecode,
+                    'airlineName': airlineName
                   };
                   sentDataRoundTrueBaggage.add(dataMap);
                 }
