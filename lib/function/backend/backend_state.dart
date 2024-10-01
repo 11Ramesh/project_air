@@ -18,26 +18,28 @@ class SentDataRoundState extends BackendState {
   bool isdirrectFlight;
   String fromItemCodeName;
   String toItemCodeName;
+  String classSeat;
+  List detailsforBooking;
 
-  SentDataRoundState({
-    required this.sentDataRound,
-    required this.isRoundTrip,
-    required this.isbaggage,
-    required this.isdirrectFlight,
-    required this.fromItemCodeName,
-    required this.toItemCodeName,
-  });
+  SentDataRoundState(
+      {required this.sentDataRound,
+      required this.isRoundTrip,
+      required this.isbaggage,
+      required this.isdirrectFlight,
+      required this.fromItemCodeName,
+      required this.toItemCodeName,
+      required this.classSeat,
+      required this.detailsforBooking
+      });
 }
 
 class NoDataState extends BackendState {
   NoDataState();
 }
 
-
 class ErorrState extends BackendState {
   ErorrState();
 }
-
 
 class LoadingState extends BackendState {
   LoadingState();

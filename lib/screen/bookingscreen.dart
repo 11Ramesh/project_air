@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_air/const/size.dart';
 import 'package:project_air/function/backend/backend_bloc.dart';
+import 'package:project_air/screen/giveuserdetails.dart';
 import 'package:project_air/screen/home.dart';
+import 'package:project_air/screen/viewflightdetails.dart';
 import 'package:project_air/widgets/appbar.dart';
 
 import 'package:project_air/widgets/booking/cardroudtrip.dart';
@@ -21,6 +23,8 @@ class Booking extends StatefulWidget {
 
 class _BookingState extends State<Booking> {
   late BackendBloc backendBloc;
+  late int tokenExpiry;
+  String? token = '';
 
   @override
   void initState() {
@@ -29,6 +33,9 @@ class _BookingState extends State<Booking> {
   }
 
   iniitialize() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    tokenExpiry = sharedPreferences.getInt('token_expiry') ?? 0;
+    token = sharedPreferences.getString('token');
     backendBloc = BlocProvider.of<BackendBloc>(context);
   }
 
@@ -41,6 +48,7 @@ class _BookingState extends State<Booking> {
           bool isRoundTrip = state.isRoundTrip;
           bool isbaggage = state.isbaggage;
           bool isdirrectFlight = state.isdirrectFlight;
+          String classSeat = state.classSeat;
 
           return WillPopScope(
             onWillPop: () async {
@@ -136,6 +144,32 @@ class _BookingState extends State<Booking> {
                             image: sentDataRound[index]['airlinecode']
                                 .toLowerCase(),
                             //image: 'tk'
+                            fligtdetails: () {
+                              showBoxFlightDetails(
+                                  context,
+                                  sentDataRound[index]['segmentData'],
+                                  sentDataRound[index]['airlineName'],
+                                  classSeat,
+                                  sentDataRound[index]['weight']);
+                            },
+                            bookNow: () {
+                              if (token != null &&
+                                  DateTime.now().millisecondsSinceEpoch <
+                                      tokenExpiry) {
+                                Map<String, dynamic> data =
+                                    state.detailsforBooking[index];
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => GivenUserDetails(
+                                            pricingData: data)));
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Tokenexpired()));
+                              }
+                            },
                           ),
                           Height(height: 10)
                         ],

@@ -24,6 +24,8 @@ class FlightCardRound extends StatelessWidget {
   bool isbaggage;
   String? airLineName;
   String? image;
+  void Function() fligtdetails;
+  void Function() bookNow;
 
   FlightCardRound({
     this.startTimes,
@@ -42,6 +44,9 @@ class FlightCardRound extends StatelessWidget {
     this.startDate,
     this.airLineName,
     this.image,
+    required this.fligtdetails,
+    required this.bookNow,
+
     super.key,
   });
 
@@ -229,7 +234,7 @@ class FlightCardRound extends StatelessWidget {
                       ? ScreenUtil.screenWidth * 0.35
                       : ScreenUtil.screenWidth * 0.35,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: fligtdetails,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,
@@ -255,7 +260,7 @@ class FlightCardRound extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: bookNow,
                     child: Textshow(
                       text: "Book Now",
                       fontSize: ScreenUtil.screenWidth < 400 ? 9 : 11,

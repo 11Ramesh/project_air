@@ -51,6 +51,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         List<Map<String, dynamic>> sentDataRoundFalseBaggage = [];
         List<Map<String, dynamic>> sentDataRoundTrueBaggage = [];
         List<Map<String, String>> segmentData = [];
+        List detailsforBooking = [];
 
         try {
           var queryParams = {
@@ -113,6 +114,10 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     endDate = endDate!.substring(0, 10);
                     endlocation = Element['arrival']['iataCode'];
                     //
+                    String flightNumber =
+                        Element['carrierCode'] + Element['number'];
+
+                    //
                     Map<String, String> segmentDataMap = {
                       'spentTime': spentTime ?? '',
                       'startTime': startTime ?? '',
@@ -121,11 +126,11 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                       'endTime': endTime ?? '',
                       'endDate': endDate ?? '',
                       'endLocation': endlocation ?? '',
+                      'flightNumber': flightNumber ?? '',
                     };
-                    print(segmentDataMap);
+
                     segmentData.add(segmentDataMap);
                   }
-                  print('object');
                 }
 
                 //
@@ -172,9 +177,10 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     'adult': adult.toString(),
                     'weight': weight,
                     'airlinecode': airlinecode,
-                    'airlineName': airlineName
+                    'airlineName': airlineName,
                   };
                   sentDataRoundTrueBaggage.add(dataMap);
+                  detailsforBooking.add(Element);
                 }
               }
 
@@ -185,7 +191,10 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     isbaggage: isbaggage,
                     isdirrectFlight: isdirrectFlight,
                     fromItemCodeName: fromItemCodeName,
-                    toItemCodeName: toItemCodeName));
+                    toItemCodeName: toItemCodeName,
+                    classSeat: classSeat,
+                    detailsforBooking:detailsforBooking
+                    ));
               } else {
                 emit(SentDataRoundState(
                     sentDataRound: sentDataRoundFalseBaggage,
@@ -193,7 +202,10 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     isbaggage: isbaggage,
                     isdirrectFlight: isdirrectFlight,
                     fromItemCodeName: fromItemCodeName,
-                    toItemCodeName: toItemCodeName));
+                    toItemCodeName: toItemCodeName,
+                    classSeat: classSeat,
+                    detailsforBooking:detailsforBooking
+                    ));
               }
             } else {
               emit(NoDataState());

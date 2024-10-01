@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_air/const/size.dart';
 import 'package:project_air/widgets/textShow.dart';
 
 class Button extends StatelessWidget {
@@ -8,9 +9,12 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Textshow(text: text),
+    return Container(
+      width: ScreenUtil.screenWidth * 0.4,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Textshow(text: text),
+      ),
     );
   }
 }
