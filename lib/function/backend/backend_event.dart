@@ -33,3 +33,9 @@ class SearchFlightEvent extends BackendEvent {
 class emptyEvent extends BackendEvent {
   emptyEvent();
 }
+
+class OrderFlightEvent extends BackendEvent {
+  Map<String, dynamic> pricingData;
+  List<Map<String, String>> passengers;
+  OrderFlightEvent(this.pricingData, this.passengers);
+}

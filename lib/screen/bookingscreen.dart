@@ -162,7 +162,7 @@ class _BookingState extends State<Booking> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => GivenUserDetails(
-                                            pricingData: data)));
+                                            pricingData: data, adult: sentDataRound[index]['adult'])));
                               } else {
                                 Navigator.push(
                                     context,

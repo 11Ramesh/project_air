@@ -193,8 +193,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     fromItemCodeName: fromItemCodeName,
                     toItemCodeName: toItemCodeName,
                     classSeat: classSeat,
-                    detailsforBooking:detailsforBooking
-                    ));
+                    detailsforBooking: detailsforBooking));
               } else {
                 emit(SentDataRoundState(
                     sentDataRound: sentDataRoundFalseBaggage,
@@ -204,8 +203,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     fromItemCodeName: fromItemCodeName,
                     toItemCodeName: toItemCodeName,
                     classSeat: classSeat,
-                    detailsforBooking:detailsforBooking
-                    ));
+                    detailsforBooking: detailsforBooking));
               }
             } else {
               emit(NoDataState());
@@ -219,6 +217,116 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         }
       } else if (event is emptyEvent) {
         emit(LoadingState());
+      } else if (event is OrderFlightEvent) {
+        Map<String, dynamic> restBody = {
+          "remarks": {
+            "general": [
+              {
+                "subType": "GENERAL_MISCELLANEOUS",
+                "text": "ONLINE BOOKING FROM INCREIBLE VIAJES"
+              },
+            ]
+          },
+          "ticketingAgreement": {"option": "DELAY_TO_CANCEL", "delay": "6D"},
+          "contacts": [
+            {
+              "addresseeName": {"firstName": "PABLO", "lastName": "RODRIGUEZ"},
+              "companyName": "INCREIBLE VIAJES",
+              "purpose": "STANDARD",
+              "phones": [
+                {
+                  "deviceType": "LANDLINE",
+                  "countryCallingCode": "34",
+                  "number": "480080071"
+                },
+                {
+                  "deviceType": "MOBILE",
+                  "countryCallingCode": "33",
+                  "number": "480080072"
+                }
+              ],
+              "emailAddress": "support@increibleviajes.es",
+              "address": {
+                "lines": ["Calle Prado, 16"],
+                "postalCode": "28014",
+                "cityName": "Madrid",
+                "countryCode": "ES"
+              }
+            }
+          ]
+        };
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
+        String token = sharedPreferences.getString('token').toString();
+
+        Map<String, dynamic> pricingData = event.pricingData;
+        List<Map<String, String>> passengers = event.passengers;
+        try {
+          var url = Uri.parse('$OrderURL');
+
+          var response = await http.post(
+            url,
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(<String, dynamic>{
+              "data": {
+                "type": "flight-order",
+                "flightOffers": [pricingData],
+                "travelers": [
+                  for (int i = 0; i < passengers.length; i++)
+                    {
+                      "id": "${i + 1}",
+                      "dateOfBirth": "${passengers[i]['dob']}",
+                      "name": {
+                        "firstName": "${passengers[i]['firstName']}",
+                        "lastName": "${passengers[i]['surname']}"
+                      },
+                      "gender": "${passengers[i]['gender']}",
+                      "contact": {
+                        "emailAddress": "${passengers[i]['email']}",
+                        "phones": [
+                          {
+                            "deviceType": "MOBILE",
+                            "countryCallingCode": "34",
+                            "number": "480080076"
+                          }
+                        ]
+                      },
+                      "documents": [
+                        {
+                          "documentType": "PASSPORT",
+                          "birthPlace": "Madrid",
+                          "issuanceLocation": "Madrid",
+                          "issuanceDate": "2015-04-14",
+                          "number": "00000000",
+                          "expiryDate": "2025-04-14",
+                          "issuanceCountry": "ES",
+                          "validityCountry": "ES",
+                          "nationality": "ES",
+                          "holder": true
+                        }
+                      ]
+                    }
+                ],
+                ...restBody
+              }
+            }),
+          );
+          if (response.statusCode == 201) {
+            var data = jsonDecode(response.body);
+            print(data['data']['type']);
+            emit(OrderFlightState(
+              orderFlightID: data['data']['id'],
+              orderFlightData: data['data']['travelers'][0],
+            ));
+          } else {
+            print(response.statusCode);
+          }
+        } catch (e) {
+          print(e);
+        }
       }
     });
   }

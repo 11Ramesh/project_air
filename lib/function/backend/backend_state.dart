@@ -29,8 +29,7 @@ class SentDataRoundState extends BackendState {
       required this.fromItemCodeName,
       required this.toItemCodeName,
       required this.classSeat,
-      required this.detailsforBooking
-      });
+      required this.detailsforBooking});
 }
 
 class NoDataState extends BackendState {
@@ -43,4 +42,14 @@ class ErorrState extends BackendState {
 
 class LoadingState extends BackendState {
   LoadingState();
+}
+
+class OrderFlightState extends BackendState {
+  Map<String, dynamic> orderFlightData;
+  String orderFlightID;
+
+  OrderFlightState({
+    required this.orderFlightID,
+    required this.orderFlightData,
+  });
 }
