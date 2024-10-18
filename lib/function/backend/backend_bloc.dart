@@ -52,6 +52,25 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
         List<Map<String, dynamic>> sentDataRoundTrueBaggage = [];
         List<Map<String, String>> segmentData = [];
         List detailsforBooking = [];
+        List<String> PersonNames = [];
+
+        if (adult != 0) {
+          for (var i = 0; i < adult; i++) {
+            PersonNames.add('Adult ${i + 1}');
+          }
+        }
+
+        if (children != 0) {
+          for (var i = 0; i < children; i++) {
+            PersonNames.add('Children ${i + 1}');
+          }
+        }
+
+        if (infant != 0) {
+          for (var i = 0; i < infant; i++) {
+            PersonNames.add('Infant ${i + 1}');
+          }
+        }
 
         try {
           var queryParams = {
@@ -163,7 +182,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                   Map<String, dynamic> dataMap = {
                     'segmentData': segmentData,
                     'price': price ?? '',
-                    'adult': adult.toString(),
+                    'children': children.toString(),
                     'weight': weight,
                     'airlinecode': airlinecode,
                     'airlineName': airlineName
@@ -193,7 +212,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     fromItemCodeName: fromItemCodeName,
                     toItemCodeName: toItemCodeName,
                     classSeat: classSeat,
-                    detailsforBooking: detailsforBooking));
+                    detailsforBooking: detailsforBooking,
+                    PersonNames: PersonNames));
               } else {
                 emit(SentDataRoundState(
                     sentDataRound: sentDataRoundFalseBaggage,
@@ -203,7 +223,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                     fromItemCodeName: fromItemCodeName,
                     toItemCodeName: toItemCodeName,
                     classSeat: classSeat,
-                    detailsforBooking: detailsforBooking));
+                    detailsforBooking: detailsforBooking,
+                    PersonNames: PersonNames));
               }
             } else {
               emit(NoDataState());
@@ -218,6 +239,22 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
       } else if (event is emptyEvent) {
         emit(LoadingState());
       } else if (event is OrderFlightEvent) {
+        Map<String, dynamic> document = {
+          "documents": [
+            {
+              "documentType": "PASSPORT",
+              "birthPlace": "Madrid",
+              "issuanceLocation": "Madrid",
+              "issuanceDate": "2015-04-14",
+              "number": "00000000",
+              "expiryDate": "2025-04-14",
+              "issuanceCountry": "ES",
+              "validityCountry": "ES",
+              "nationality": "ES",
+              "holder": true
+            }
+          ]
+        };
         Map<String, dynamic> restBody = {
           "remarks": {
             "general": [
@@ -294,20 +331,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                           }
                         ]
                       },
-                      "documents": [
-                        {
-                          "documentType": "PASSPORT",
-                          "birthPlace": "Madrid",
-                          "issuanceLocation": "Madrid",
-                          "issuanceDate": "2015-04-14",
-                          "number": "00000000",
-                          "expiryDate": "2025-04-14",
-                          "issuanceCountry": "ES",
-                          "validityCountry": "ES",
-                          "nationality": "ES",
-                          "holder": true
-                        }
-                      ]
+                      if (i == 0) ...document
                     }
                 ],
                 ...restBody
@@ -323,6 +347,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
             ));
           } else {
             print(response.statusCode);
+            print(response.body);
           }
         } catch (e) {
           print(e);

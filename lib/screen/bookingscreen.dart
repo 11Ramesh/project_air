@@ -25,6 +25,7 @@ class _BookingState extends State<Booking> {
   late BackendBloc backendBloc;
   late int tokenExpiry;
   String? token = '';
+  
 
   @override
   void initState() {
@@ -44,6 +45,8 @@ class _BookingState extends State<Booking> {
     return BlocBuilder<BackendBloc, BackendState>(
       builder: (context, state) {
         if (state is SentDataRoundState) {
+          
+          List<String> PersonNames = state.PersonNames;
           List<Map<String, dynamic>> sentDataRound = state.sentDataRound;
           bool isRoundTrip = state.isRoundTrip;
           bool isbaggage = state.isbaggage;
@@ -162,7 +165,7 @@ class _BookingState extends State<Booking> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => GivenUserDetails(
-                                            pricingData: data, adult: sentDataRound[index]['adult'])));
+                                            pricingData: data, PersonNames: PersonNames)));
                               } else {
                                 Navigator.push(
                                     context,

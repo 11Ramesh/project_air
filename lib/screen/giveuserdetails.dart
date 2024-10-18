@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_air/const/const.dart';
@@ -16,9 +17,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GivenUserDetails extends StatefulWidget {
   final Map<String, dynamic> pricingData;
-  final String adult;
+  final List<String> PersonNames;
 
-  GivenUserDetails({required this.pricingData, required this.adult, Key? key})
+  GivenUserDetails(
+      {required this.pricingData, required this.PersonNames, Key? key})
       : super(key: key);
 
   @override
@@ -34,7 +36,8 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
   List<TextEditingController> _firstNameControllers = [];
   List<TextEditingController> _surnameControllers = [];
   List<TextEditingController> _dobControllers = [];
-  List<TextEditingController> _emailControllers = [];
+  final TextEditingController _emailControllers = TextEditingController();
+  final TextEditingController _contactControllers = TextEditingController();
 
   String _paymentMethod = 'Cash';
   bool _acceptedTerms = false;
@@ -45,7 +48,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
     super.initState();
     initialized();
 
-    int numberOfAdults = int.parse(widget.adult);
+    int numberOfAdults = widget.PersonNames.length;
 
     _formKeys = List.generate(numberOfAdults, (_) => GlobalKey<FormState>());
     _firstNameControllers =
@@ -54,8 +57,8 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
         List.generate(numberOfAdults, (_) => TextEditingController());
     _dobControllers =
         List.generate(numberOfAdults, (_) => TextEditingController());
-    _emailControllers =
-        List.generate(numberOfAdults, (_) => TextEditingController());
+    // _emailControllers =
+    //     List.generate(numberOfAdults, (_) => TextEditingController());
     _genders = List.generate(
         numberOfAdults, (_) => 'Mr'); // Initialize gender as empty string
   }
@@ -76,7 +79,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                   ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: int.parse(widget.adult),
+                      itemCount: widget.PersonNames.length,
                       itemBuilder: (context, i) {
                         return Form(
                           key: _formKeys[
@@ -86,7 +89,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Textshow(
-                                  text: "Adult ${i + 1}",
+                                  text: widget.PersonNames[i],
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -162,23 +165,41 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                                 keyboardType: TextInputType.datetime,
                               ),
                               Height(height: 15),
-                              CustomTextFormField(
-                                controller: _emailControllers[i],
-                                labelText: 'Email*',
-                                hintText: '',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  final regExp = RegExp(pattern);
+                              i == 0
+                                  ? CustomTextFormField(
+                                      controller: _emailControllers,
+                                      labelText: 'Email*',
+                                      hintText: '',
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your email';
+                                        }
+                                        final regExp = RegExp(pattern);
 
-                                  if (!regExp.hasMatch(value)) {
-                                    return 'Enter a valid email format';
-                                  }
-                                  return null;
-                                },
-                                keyboardType: TextInputType.emailAddress,
-                              ),
+                                        if (!regExp.hasMatch(value)) {
+                                          return 'Enter a valid email format';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.emailAddress,
+                                    )
+                                  : Container(),
+                              Height(height: 15),
+                              i == 0
+                                  ? CustomTextFormField(
+                                      controller: _contactControllers,
+                                      labelText: 'Contact Number*',
+                                      hintText: '',
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your contact number';
+                                        }
+
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.emailAddress,
+                                    )
+                                  : Container(),
                               Height(height: 30),
                             ],
                           ),
@@ -277,7 +298,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
       if (response.statusCode == 200) {
         print('Pricing data fetched successfully');
         Map<String, dynamic> data = jsonDecode(response.body);
-
+        print(data);
         setState(() {
           flightOrderdata = data['data']['flightOffers'][0];
         });
@@ -292,7 +313,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
   void _submitForm(BuildContext context) {
     int count = 0;
     int numberOfAdults =
-        int.parse(widget.adult); // Make sure widget.adult is a valid integer
+        widget.PersonNames.length; // Make sure widget.adult is a valid integer
 
     for (int i = 0; i < numberOfAdults; i++) {
       print(_formKeys[i]);
@@ -323,10 +344,11 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
           'firstName': _firstNameControllers[i].text,
           'surname': _surnameControllers[i].text,
           'dob': _dobControllers[i].text,
-          'email': _emailControllers[i].text
+          'email': _emailControllers.text,
+          'contact': _contactControllers.text
         });
       }
-
+      // print(passengers);
       // Proceed with sending passenger data or further processing
       backendBloc.add(OrderFlightEvent(widget.pricingData, passengers));
 

@@ -20,6 +20,7 @@ class SentDataRoundState extends BackendState {
   String toItemCodeName;
   String classSeat;
   List detailsforBooking;
+  List<String> PersonNames;
 
   SentDataRoundState(
       {required this.sentDataRound,
@@ -29,7 +30,9 @@ class SentDataRoundState extends BackendState {
       required this.fromItemCodeName,
       required this.toItemCodeName,
       required this.classSeat,
-      required this.detailsforBooking});
+      required this.detailsforBooking,
+      required this.PersonNames
+      });
 }
 
 class NoDataState extends BackendState {
