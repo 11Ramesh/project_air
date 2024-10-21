@@ -163,6 +163,70 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                                   if (!dateRegExp.hasMatch(value)) {
                                     return 'Please enter a valid date (YYYY-MM-DD)';
                                   }
+                                  DateTime dateTime = DateTime.parse(value);
+                                  DateTime today = DateTime.now();
+                                  if (dateTime.isAfter(today)) {
+                                    return 'Date cannot be in the future';
+                                  }
+                                  // Calculate the difference in years
+                                  int differenceInYears =
+                                      today.year - dateTime.year;
+
+// Convert the first character of the person's name to uppercase
+                                  String isNameStartsWith =
+                                      widget.PersonNames[i][0].toUpperCase();
+
+// Determine if the person is under eleven years old
+                                  bool isUnderElevenYearsOld =
+                                      differenceInYears > 11 ||
+                                          (differenceInYears == 11 &&
+                                              (dateTime.month < today.month ||
+                                                  (dateTime.month ==
+                                                          today.month &&
+                                                      dateTime.day <=
+                                                          today.day)));
+
+// Determine if the person is under two years old
+                                  bool isUnderTwoYearsOld = differenceInYears <
+                                          2 ||
+                                      (differenceInYears == 2 &&
+                                          (dateTime.month > today.month ||
+                                              (dateTime.month == today.month &&
+                                                  dateTime.day > today.day)));
+
+// Determine if the person is between two and eleven years old
+                                  bool isBetweenTwoAndEleven =
+                                      (differenceInYears > 2 &&
+                                              differenceInYears < 11) ||
+                                          (differenceInYears == 2 &&
+                                              (dateTime.month < today.month ||
+                                                  (dateTime.month ==
+                                                          today.month &&
+                                                      dateTime.day <=
+                                                          today.day))) ||
+                                          (differenceInYears == 11 &&
+                                              (dateTime.month > today.month ||
+                                                  (dateTime.month ==
+                                                          today.month &&
+                                                      dateTime.day >=
+                                                          today.day)));
+
+// Now you can use isUnderElevenYearsOld, isUnderTwoYearsOld, and isBetweenTwoAndEleven accordingly
+
+                                  if (isNameStartsWith == 'A' &&
+                                      !isUnderElevenYearsOld) {
+                                    return 'Age must be greater than 11 years';
+                                  }
+
+                                  if (isNameStartsWith == 'I' &&
+                                      !isUnderTwoYearsOld) {
+                                    return 'Age must be less than 2 years';
+                                  }
+
+                                  if (isNameStartsWith == 'C' &&
+                                      !isBetweenTwoAndEleven) {
+                                    return 'Age must be less than 11 and greater than 2 years';
+                                  }
 
                                   return null;
                                 },
@@ -183,6 +247,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                                         if (!regExp.hasMatch(value)) {
                                           return 'Enter a valid email format';
                                         }
+
                                         return null;
                                       },
                                       keyboardType: TextInputType.emailAddress,
@@ -378,12 +443,12 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
           'contactCode': _countryCode
         });
       }
-      // print(passengers);
+      print(passengers);
       // Proceed with sending passenger data or further processing
-      backendBloc.add(OrderFlightEvent(flightOrderdata, passengers));
+      // backendBloc.add(OrderFlightEvent(flightOrderdata, passengers));
 
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => OrderDataShow()));
+      // Navigator.push(
+      //     context, MaterialPageRoute(builder: (context) => OrderDataShow()));
     } else {}
   }
 
