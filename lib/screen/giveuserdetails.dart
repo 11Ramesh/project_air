@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import 'package:project_air/const/const.dart';
 import 'package:project_air/const/size.dart';
 import 'package:project_air/function/backend/backend_bloc.dart';
@@ -42,6 +44,8 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
   String _paymentMethod = 'Cash';
   bool _acceptedTerms = false;
   Map<String, dynamic> flightOrderdata = {};
+  String _countryCode = '41';
+  bool _validatedPhone = false;
 
   @override
   void initState() {
@@ -186,18 +190,43 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
                                   : Container(),
                               Height(height: 15),
                               i == 0
-                                  ? CustomTextFormField(
+                                  ? IntlPhoneField(
                                       controller: _contactControllers,
-                                      labelText: 'Contact Number*',
-                                      hintText: '',
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter your contact number';
+                                      decoration: const InputDecoration(
+                                        labelText: 'Phone Number',
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(),
+                                        ),
+                                      ),
+                                      initialCountryCode: 'IT',
+                                      onChanged: (phone) {
+                                        String a = phone.countryCode;
+                                        _countryCode =
+                                            a.replaceAll(RegExp(r'\D'), '');
+                                        //print(phone.countryISOCode);
+                                        try {
+                                          if (phone.isValidNumber()) {
+                                            _validatedPhone = true;
+                                          } else {
+                                            _validatedPhone = false;
+                                          }
+                                        } catch (e) {
+                                          setState(() {
+                                            _validatedPhone = false;
+                                          });
                                         }
 
+                                        print(_validatedPhone);
+                                      },
+                                      validator: (value) {
+                                        if (!_validatedPhone ||
+                                            _contactControllers.text.isEmpty) {
+                                          print(_validatedPhone);
+                                          return 'Please enter your valid Phone Number';
+                                        }
+                                        print(_validatedPhone);
                                         return null;
                                       },
-                                      keyboardType: TextInputType.emailAddress,
                                     )
                                   : Container(),
                               Height(height: 30),
@@ -298,7 +327,7 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
       if (response.statusCode == 200) {
         print('Pricing data fetched successfully');
         Map<String, dynamic> data = jsonDecode(response.body);
-        print(data);
+        //print(data);
         setState(() {
           flightOrderdata = data['data']['flightOffers'][0];
         });
@@ -345,12 +374,13 @@ class _GivenUserDetailsState extends State<GivenUserDetails> {
           'surname': _surnameControllers[i].text,
           'dob': _dobControllers[i].text,
           'email': _emailControllers.text,
-          'contact': _contactControllers.text
+          'contact': _contactControllers.text,
+          'contactCode': _countryCode
         });
       }
       // print(passengers);
       // Proceed with sending passenger data or further processing
-      backendBloc.add(OrderFlightEvent(widget.pricingData, passengers));
+      backendBloc.add(OrderFlightEvent(flightOrderdata, passengers));
 
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => OrderDataShow()));

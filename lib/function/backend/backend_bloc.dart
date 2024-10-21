@@ -296,7 +296,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
             await SharedPreferences.getInstance();
         String token = sharedPreferences.getString('token').toString();
 
-        Map<String, dynamic> pricingData = event.pricingData;
+        Map<String, dynamic> flightOrderdata = event.flightOrderdata;
         List<Map<String, String>> passengers = event.passengers;
         try {
           var url = Uri.parse('$OrderURL');
@@ -310,7 +310,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
             body: jsonEncode(<String, dynamic>{
               "data": {
                 "type": "flight-order",
-                "flightOffers": [pricingData],
+                "flightOffers": [flightOrderdata],
                 "travelers": [
                   for (int i = 0; i < passengers.length; i++)
                     {
@@ -326,8 +326,8 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
                         "phones": [
                           {
                             "deviceType": "MOBILE",
-                            "countryCallingCode": "34",
-                            "number": "480080076"
+                            "countryCallingCode": passengers[i]['contactCode'],
+                            "number": passengers[i]['contact']
                           }
                         ]
                       },
@@ -340,7 +340,7 @@ class BackendBloc extends Bloc<BackendEvent, BackendState> {
           );
           if (response.statusCode == 201) {
             var data = jsonDecode(response.body);
-            print(data['data']['type']);
+            print(data['data']['travelers'][0]);
             emit(OrderFlightState(
               orderFlightID: data['data']['id'],
               orderFlightData: data['data']['travelers'][0],
